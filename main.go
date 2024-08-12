@@ -6,6 +6,11 @@ import (
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
+	// check if url matches if not return this
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
 	w.Write([]byte("Hello from snippetshare"))
 }
 
@@ -14,7 +19,13 @@ func snippetView(w http.ResponseWriter, r *http.Request) {
 }
 
 func snippetCreate(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Create a new snippet"))
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
+
+		http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Write([]byte("Create a new snippet ..."))
 }
 
 func main() {
