@@ -4,15 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dhvll/snippetshare/internal/models"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		app.notFound(w)
-		return
-	}
+
 	//panic("testing")
 	snippets, err := app.snippets.Latest()
 	if err != nil {
@@ -24,28 +22,12 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	data.Snippets = snippets
 	app.render(w, http.StatusOK, "home.tmpl", data)
 
-	//files := []string{
-	//	"./ui/html/base.tmpl",
-	//	"./ui/html/partials/nav.tmpl",
-	//	"./ui/html/pages/home.tmpl",
-	//}
-
-	//ts, err := template.ParseFiles(files...)
-	//if err != nil {
-	//	app.serverError(w, err)
-	//	return
-	//}
-	//data := &templateData{
-	//	Snippets: snippets,
-	//}
-	//err = ts.ExecuteTemplate(w, "base", data)
-	//if err != nil {
-	//	app.serverError(w, err)
-	//}
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	params := httprouter.ParamsFromContext(r.Context())
+
+	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
@@ -65,6 +47,10 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Display the form for creating a new snippet.. "))
+}
+
+func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		app.clientError(w, http.StatusMethodNotAllowed)
